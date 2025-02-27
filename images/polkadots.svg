@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1009.27 1009.27">
+  <defs>
+    <style>
+      .cls-1 {
+        opacity: .5;
+      }
+
+      .cls-2 {
+        fill: #231f20;
+        stroke-width: 0px;
+      }
+    </style>
+  </defs>
+  <g class="cls-1">
+    <circle class="cls-2" cx="100.93" cy="100.93" r="28.92"/>
+    <circle class="cls-2" cx="302.78" cy="100.93" r="28.92"/>
+    <circle class="cls-2" cx="504.64" cy="100.93" r="28.92"/>
+    <circle class="cls-2" cx="706.49" cy="100.93" r="28.92"/>
+    <circle class="cls-2" cx="908.35" cy="100.93" r="28.92"/>
+    <circle class="cls-2" cx="100.93" cy="302.78" r="28.92"/>
+    <circle class="cls-2" cx="302.78" cy="302.78" r="28.92"/>
+    <circle class="cls-2" cx="504.64" cy="302.78" r="28.92"/>
+    <circle class="cls-2" cx="706.49" cy="302.78" r="28.92"/>
+    <circle class="cls-2" cx="908.35" cy="302.78" r="28.92"/>
+    <circle class="cls-2" cx="100.93" cy="504.64" r="28.92"/>
+    <circle class="cls-2" cx="302.78" cy="504.64" r="28.92"/>
+    <circle class="cls-2" cx="504.64" cy="504.64" r="28.92"/>
+    <circle class="cls-2" cx="706.49" cy="504.64" r="28.92"/>
+    <circle class="cls-2" cx="908.35" cy="504.64" r="28.92"/>
+    <circle class="cls-2" cx="100.93" cy="706.49" r="28.92"/>
+    <circle class="cls-2" cx="302.78" cy="706.49" r="28.92"/>
+    <circle class="cls-2" cx="504.64" cy="706.49" r="28.92"/>
+    <circle class="cls-2" cx="706.49" cy="706.49" r="28.92"/>
+    <circle class="cls-2" cx="908.35" cy="706.49" r="28.92"/>
+    <circle class="cls-2" cx="100.93" cy="908.35" r="28.92"/>
+    <circle class="cls-2" cx="302.78" cy="908.35" r="28.92"/>
+    <circle class="cls-2" cx="504.64" cy="908.35" r="28.92"/>
+    <circle class="cls-2" cx="706.49" cy="908.35" r="28.92"/>
+    <circle class="cls-2" cx="908.35" cy="908.35" r="28.92"/>
+  </g>
+</svg>

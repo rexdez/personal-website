@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How to Integrate Amazon SES with Golang SDK V2</title>
+  <link rel="stylesheet" href="/css/prism-full.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/blog.css">
+</head>
+<body>
+  <header>
+    <div class="logo">
+        ROHIT
+    </div>
+    <div class="header-items">
+        <a href="/">Home</a>
+        <a href="/blog">Blog</a>
+    </div>
+</header>
+  <div class="main-content">
+    <div class="hero-content">
+      <div class="article-info">
+        <p><a href="https://rohitdeka.com" target="_blank">ROHIT DEKA</a> &nbsp;&nbsp; | &nbsp;&nbsp; APRIL 2024</p>
+      </div>
+      <h1 class="article-title">How to Integrate Amazon SES with Golang SDK V2?</h1>
+      <p class="article-description">This Article is about Integration of Amazon SES in Golang with golang SDK V2. Official documentation does not cover the implementation of AWS SES with Go SDK V2. However, documentation for AWS Go SDK V1 exists, most probably for backward compatibility. To explore more, Read Here: <a href="https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/welcome.html">(V1)AWS Go SDK Docs</a>, <a href="https://aws.github.io/aws-sdk-go-v2/docs/">(V2)AWS Go SDK Docs</a></p>
+    </div>
+    <hr>
+
+    <!-- Main Content -->
+    <div id="content" class="article-content"></div>
+  </div>
+  <div id="md-data" hidden>
+  ## Introduction
+  While trying to integrate AWS SES in Go, you might have lost brain cells over spending countless hours finding the right documentation, or skimmed through YouTube tutorials just to make the emails reach your inbox. I understand it's tough; _been there myself!_   So here I am sharing a step-by-step process to integrate AWS Golang SDK V2 with AWS SES to save you from the pain and save some sweat. Enjoy the tutorial!
+  
+  ## Prerequisites
+  This article assumes that you completed setting up your dashboard with the following requirements:
+  - Signed Up for AWS Services
+  - Verified your Account
+  - Created IAM User
+  - Created Domain identity
+  - *Set Up Easy DKIM **[Important]** by updating your domain DNS settings with the CNAME records provided under Domain identity settings
+    ![Alt text](/images/blog-1/aws-dkim-dns-config.png "a title")
+
+  
+  ## Installing AWS SDK Libraries for Go
+  Run the following commands to Get the SDK Libraries
+  ```bash
+  > go get github.com/aws/aws-sdk-go-v2/aws
+  > go get github.com/aws/aws-sdk-go-v2/service/ses
+  ```
+  You will need AWS SES types too. If in case it is not being installed by default, you can run the command:
+  ```bash
+  > go get github.com/aws/aws-sdk-go-v2/service/ses/types
+  ```
+
+  ## Set Environment Variables
+  ```properties
+AWS_REGION=us-east-1
+AWS_ACCESS_KEY_ID=aws_access_key
+AWS_SECRET_KEY_ID=aws_secret_key_id
+AWS_ARN=arn:aws:ses:us-east-1:1234567890:identity/example.com
+AWS_CONFIG=my_application_configration
+  ```
+  ## Initializing AWS Client
+  ```go
+  package main
+
+  import (
+      "github.com/aws/aws-sdk-go-v2/aws"
+      "github.com/aws/aws-sdk-go-v2/service/ses"
+      "github.com/aws/aws-sdk-go-v2/service/ses/types"
+  )
+
+  func main() {
+      awsClient := ConnectAWSClient()
+  }
+
+  func ConnectAWSClient(){
+      var (
+          Region          string = os.Getenv("AWS_REGION")
+          AccessKeyID     string = os.Getenv("AWS_ACCESS_KEY_ID")
+          SecretAccessKey string = os.Getenv("AWS_SECRET_ACCESS_KEY")
+      )
+      sesConfig := aws.Config{
+          Credentials: credentials.NewStaticCredentialsProvider(AccessKeyID, SecretAccessKey, ""),
+          Region:           *aws.String(Region),
+          RetryMaxAttempts: 3,
+      }
+      mailClient := ses.NewFromConfig(sesConfig)
+      
+      return mailClient
+  }
+  ```
+  - `NewStaticCredentialsProvider` will populate `aws.credential` containing which will be used to make request using the AWS Client.
+  - Type `*aws.String` returns pointer to a string as `*string`. In this case it will return the pointer to AWS Region string
+  - Now that we have prepared the configuration for AWS SES client, we will initialize the client request using `ses.NewFromConfig`
+  - Finally `mailClient` will be populated with `*ses.Client`
+  ## Preparing the Email
+  ```go
+  package main
+  import (
+    "os"
+    "github.com/aws/aws-sdk-go-v2/aws"
+    "github.com/aws/aws-sdk-go-v2/service/ses"
+    "github.com/aws/aws-sdk-go-v2/service/ses/types"
+  )
+
+  const (
+    AWS_ARN = os.Getenv("AWS_ARN")
+    AWS_CONFIG = os.Getenv("AWS_CONFIG")
+  )
+
+  func prepareEmail() *ses.EmailInput{
+    emailInput := &ses.SendEmailInput{
+      Source: aws.String("name@mydomain.com"),
+      Destination: &types.Destination{
+        ToAddresses: []string{"email@domain.com", "email2@domain.com"},
+      },
+      Message: &types.Message{
+        Body: &types.Body{
+          Html: &types.Content{
+            Data:    aws.String("&lt;h1&gt;Hi there! This is a test email&lt;/h1&gt;),
+            Charset: aws.String("utf-8"),
+          },
+        },
+        Subject: &types.Content{
+          Data:    aws.String(mailType.subject),
+          Charset: aws.String("utf-8"),
+        },
+      },
+      ConfigurationSetName: aws.String(AWS_CONFIG),
+      ReturnPathArn:        aws.String(AWS_ARN),
+      SourceArn:            aws.String(AWS_ARN),
+    }
+    return emailInput
+  }
+  ```
+  - Replace `name@mydomain.com` with your appropriate domain
+  - Replace `ToAddresses` parameters with your receipent email IDs
+  - `Message` is of type `*types.Message` defined in `ses/types` package
+  - `Message` contains both the Email Body Content and Subject
+  - The content body can be passsed as both `HTML` or `Text` format
+  - For custom layout in your email use the `HTML` format. For simple messages, feel free to proceed with `Text`
+  - Every Content is defined with `*types.Content` struct
+  ## Sending Email
+  Finally, We will start sending email with the following code using `*ses.Client` prepared above.
+  ```go
+  package main
+
+  import (
+    "os"
+    "fmt"
+    "github.com/aws/aws-sdk-go-v2/aws"
+    "github.com/aws/aws-sdk-go-v2/service/ses"
+    "github.com/aws/aws-sdk-go-v2/service/ses/types"
+  )
+
+  func main() {
+    sesClient := ConnectSESClient()
+    emailData := prepareEmail()
+    emailOutput, err := sesClient.SendEmail(context.Background(), emailData)
+    if err != nil {
+      panic(err)
+      return
+    }
+    fmt.Println(emailOutput)
+  }
+
+  func ConnectSESClient(){
+      var (
+          Region          string = os.Getenv("AWS_REGION")
+          AccessKeyID     string = os.Getenv("AWS_ACCESS_KEY_ID")
+          SecretAccessKey string = os.Getenv("AWS_SECRET_ACCESS_KEY")
+      )
+      sesConfig := aws.Config{
+          Credentials: credentials.NewStaticCredentialsProvider(AccessKeyID, SecretAccessKey, ""),
+          Region:           *aws.String(Region),
+          RetryMaxAttempts: 3,
+      }
+      mailClient := ses.NewFromConfig(sesConfig)
+      
+      return mailClient
+  }
+
+  func prepareEmail() *ses.EmailInput{
+    emailInput := &ses.SendEmailInput{
+      Source: aws.String("name@mydomain.com"),
+      Destination: &types.Destination{
+        ToAddresses: []string{"email@domain.com", "email2@domain.com"},
+      },
+      Message: &types.Message{
+        Body: &types.Body{
+          Html: &types.Content{
+            Data:    aws.String("&lt;h1&gt;Hi there! This is a test email&lt;/h1&gt;),
+            Charset: aws.String("utf-8"),
+          },
+        },
+        Subject: &types.Content{
+          Data:    aws.String(mailType.subject),
+          Charset: aws.String("utf-8"),
+        },
+      },
+      ConfigurationSetName: aws.String(AWS_CONFIG),
+      ReturnPathArn:        aws.String(AWS_ARN),
+      SourceArn:            aws.String(AWS_ARN),
+    }
+    return emailInput
+  }
+  ```
+  Here we are calling the `sesClient.SendEmail` with parameters `context.Background()`and previously prepared Email data at `emailData`.
+  Finally check receipent's email for the successful delivery and rendering of your email.
+
+  ## Conclusion
+  Thus, to Integrate Golang SDK v2 for AWS SES you will need to first initiate the client. Then prepare the enail data as `*ses.EmailInput`, and finally send it using `SendEmail` function.  
+  ## 
+  Hope this article has helped you in figuring out integration of Golang SDK with AWS SES, feel free to leave any questions at Github Issues!  
+  Github Repo:  [Golang SDK V2 Integration for AWS SES](https://github.com)
+  ##
+  Happy Coding...
+  </div>
+</body> 
+  <footer>
+    <p>Designed & Developed by Zemuria @2024</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="/js/prism-minified.js"></script>
+
+  <script>
+    const mdData = document.getElementById('content')
+    mdData.innerHTML = marked.parse(document.getElementById('md-data').innerText);
+
+    const images = document.querySelectorAll(".article-content img")
+    console.log(images)
+  </script>
+</html>
