@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	"github.com/rexdez/personal-website/system"
+
 	"github.com/rexdez/personal-website/controllers"
+	"github.com/rexdez/personal-website/system"
 )
 
 func main() {
 	conn := &system.SysConn{}
 	conn.Init()
-	handler := controllers.Controller{InitType: conn}
+	handler := controllers.Controller{Conn: conn}
 	router := InitRouter(handler)
 
 	server := &http.Server {
