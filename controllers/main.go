@@ -5,6 +5,8 @@ import (
 	"strings"
 
 	"github.com/rexdez/personal-website/common"
+	"github.com/rexdez/personal-website/system"
+	"github.com/rexdez/personal-website/templates"
 )
 
 type Conn interface {
@@ -12,14 +14,14 @@ type Conn interface {
 }
 
 type Controller struct {
-	Conn
+	system.SysConn
 }
 
 var blogs map[string]string = map[string]string{
 	"3e9" : "blog/aws-ses-golang.html",
 }
 
-func (handler *Controller) StaticHandler(root string) http.Handler{
+func (conn *Controller) StaticHandler(root string) http.Handler{
 	fs := http.FileServer(http.Dir(root))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		splits := strings.Split(root, ".")
@@ -29,7 +31,11 @@ func (handler *Controller) StaticHandler(root string) http.Handler{
 	})
 }
 
-func (handler *Controller) Homepage(w http.ResponseWriter, r *http.Request) {
+func (conn *Controller) Homepage(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("content-type", "text/html")
+	err := templates.Homepage.Execute(w, nil)
+	if err != nil {
+		go conn.Logger.Println(err)
+	}
 }

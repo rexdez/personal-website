@@ -4,12 +4,15 @@ import (
 	"log"
 	"os"
 	"sync"
+
+	"github.com/rexdez/personal-website/templates"
 )
 
 var initLoggerOnce sync.Once
 
 func (conn *SysConn) Init(){
-	conn.logger = InitializeLogger()
+	conn.Logger = InitializeLogger()
+	templates.ParseHtmlTemplates()
 }
 
 func InitializeLogger() *log.Logger {

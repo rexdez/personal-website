@@ -10,9 +10,9 @@ import (
 )
 
 func main() {
-	conn := &system.SysConn{}
+	conn := system.SysConn{}
 	conn.Init()
-	handler := controllers.Controller{Conn: conn}
+	handler := controllers.Controller{SysConn: conn}
 	router := InitRouter(handler)
 
 	server := &http.Server {
@@ -23,8 +23,14 @@ func main() {
 		IdleTimeout: time.Minute,
 	}
 
+	fmt.Printf(`=====================================
+Starting Go Server at: http://127.0.0.1:6432
+All System Checked & Connected...
+=====================================
+`)
 	err := server.ListenAndServe()
 	if err != nil {
 		panic(fmt.Sprintf("server could not be started: %v", err))
 	}
+	
 }
