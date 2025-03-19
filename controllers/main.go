@@ -17,10 +17,6 @@ type Controller struct {
 	system.SysConn
 }
 
-var blogs map[string]string = map[string]string{
-	"3e9" : "blog/aws-ses-golang.html",
-}
-
 func (conn *Controller) StaticHandler(root string) http.Handler{
 	fs := http.FileServer(http.Dir(root))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
