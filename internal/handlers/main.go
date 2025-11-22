@@ -1,4 +1,4 @@
-package controllers
+package handlers
 
 import (
 	"net/http"
@@ -13,11 +13,11 @@ type Conn interface {
 	Init()
 }
 
-type Controller struct {
+type Handlers struct {
 	system.SysConn
 }
 
-func (conn *Controller) StaticHandler(root string) http.Handler{
+func (conn *Handlers) StaticHandler(root string) http.Handler{
 	fs := http.FileServer(http.Dir(root))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		splits := strings.Split(root, ".")
@@ -27,11 +27,3 @@ func (conn *Controller) StaticHandler(root string) http.Handler{
 	})
 }
 
-func (conn *Controller) Homepage(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	w.Header().Set("content-type", "text/html")
-	err := templates.Homepage.Execute(w, nil)
-	if err != nil {
-		go conn.Logger.Println(err)
-	}
-}
