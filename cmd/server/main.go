@@ -5,18 +5,21 @@ import (
 	"net/http"
 	"time"
 	"github.com/rexdez/personal-website/internal/handlers"
-	"github.com/rexdez/personal-website/system"
 )
 
 func main() {
-	conn := system.SysConn{}
+	conn := SysConn{}
 	conn.Init()
-	handler := handlers.Handlers{SysConn: conn}
-	router := handlers.InitRouter(handler)
+	handler := handlers.Config{
+		Pool: conn.Pool,
+		Logger: conn.Logger,
+	}
+
+	handler.InitRouter()
 
 	server := &http.Server {
 		Addr: ":6432",
-		Handler: router,
+		Handler: handler.Mux,
 		ReadTimeout: time.Second*20,
 		WriteTimeout: time.Second*30,
 		IdleTimeout: time.Minute,

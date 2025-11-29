@@ -1,0 +1,8 @@
+web:
+  writeTimeout: 10s
+  readTimeout: 10s
+
+database:
+  maxIdleConnections: 10
+  maxConnections: 10
+  maxConnectionIdleTimeout: 1m

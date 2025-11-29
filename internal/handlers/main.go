@@ -1,23 +1,23 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strings"
 
-	"github.com/rexdez/personal-website/common"
-	"github.com/rexdez/personal-website/system"
-	"github.com/rexdez/personal-website/templates"
+	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rexdez/personal-website/internal/handlers/website"
+	"github.com/rexdez/personal-website/pkg/common"
 )
 
-type Conn interface {
-	Init()
+type Config struct {
+	Pool *pgxpool.Pool
+	Mux *chi.Mux
+	Logger *log.Logger
 }
 
-type Handlers struct {
-	system.SysConn
-}
-
-func (conn *Handlers) StaticHandler(root string) http.Handler{
+func (cfg *Config) StaticHandler(root string) http.Handler{
 	fs := http.FileServer(http.Dir(root))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		splits := strings.Split(root, ".")
@@ -27,3 +27,17 @@ func (conn *Handlers) StaticHandler(root string) http.Handler{
 	})
 }
 
+func (cfg *Config) InitRouter() {
+	
+	pages := website.Webpages{Pool:cfg.Pool, Logger:cfg.Logger, Mux:cfg.Mux}
+	// Initializing templates
+	pages.LoadTemplates()
+
+	// Initializing router
+	r := chi.NewRouter()
+	fs := cfg.StaticHandler("web/static")
+	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+
+	r.Get("/", pages.Homepage)
+	cfg.Mux = r
+}
