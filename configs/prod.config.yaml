@@ -3,6 +3,6 @@ web:
   readTimeout: 10s
 
 database:
-  maxIdleConnections: 10
+  maxIdleConnections: 5
   maxConnections: 10
   maxConnectionIdleTimeout: 1m
